@@ -1,0 +1,32 @@
+{
+  "name": "Skip Intro Streaming",
+  "version": "1.0",
+  "description": "Extensão pula introdução de animes e series em sites de streaming",
+  "manifest_version": 3,
+  "action": {
+    "title": "Skip Intro Streaming",
+    "default_icon": "Skip-128.png",
+    "icon": "Skip-128.png",
+    "default_popup": "popup.html"
+  },
+  "permissions": [
+    "storage"
+  ],
+  "host_permissions": [
+    "https://www.starplus.com/*",
+    "https://www.disneyplus.com/*",
+    "https://www.primevideo.com/*",
+    "https://www.netflix.com/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.starplus.com/video/*",
+        "https://www.disneyplus.com/video/*",
+        "https://www.primevideo.com/*",
+        "https://www.netflix.com/watch/*"
+      ],
+      "js": ["script.js"]
+    }
+  ]
+}
