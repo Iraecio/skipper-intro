@@ -49,6 +49,11 @@ const selectors = {
       selector: ".atvwebplayersdk-nextupcard-button",
       option: "autoPlayNext",
     },
+    {
+      info: "Next episode.",
+      selector: ".atvwebplayersdk-nexttitle-button",
+      option: "skipCredits",
+    },
   ],
   [platforms.DISNEY_PLUS]: [
     {
@@ -82,6 +87,7 @@ const DEFAULT_OPTIONS = {
   skipIntroSequence: true,
   skipRecapSequence: true,
   autoPlayNext: true,
+  skipCredits: "0",
 };
 const CHECK_INTERVAL_MS = 1000;
 
@@ -105,10 +111,61 @@ function detectPlatform() {
 function checkForElements() {
   const platform = detectPlatform();
   for (const element of selectors[platform]) {
+    if (element.option === "skipCredits") continue;
     const target = document.querySelector(element.selector);
     if (!target) continue;
     if (options[element.option]) target.click();
     return;
+  }
+}
+
+function checkTime(userTime, videoTime) {
+  const timeRegex = /^([0-5]?[0-9])$/;
+
+  // Verifica se as entradas possuem o formato "mm:ss"
+  if (!timeRegex.test(userTime) || !timeRegex.test(videoTime)) {
+    throw new Error("Formato de tempo inválido");
+  }
+
+  const totalSegundos1 = parseInt(userTime);
+  const totalSegundos2 = parseInt(videoTime);
+
+  return totalSegundos1 <= totalSegundos2;
+}
+
+//primevideo
+function skipCredit() {
+  const platform = detectPlatform();
+  const skipCreditsOption = options.skipCredits;
+  const timeIndicatorText = document.querySelector(
+    ".atvwebplayersdk-timeindicator-text"
+  );
+
+  for (const { option, selector } of selectors[platform]) {
+    if (
+      option !== "skipCredits" ||
+      skipCreditsOption === DEFAULT_OPTIONS.skipCredits
+    ) {
+      continue;
+    }
+
+    const durationText = timeIndicatorText
+      ?.querySelector("span")
+      ?.textContent?.trim();
+    if (!durationText || null) {
+      continue;
+    }
+
+    const [videoTime, videoSeconds] = durationText.substring(2).split(":");
+    const skip = checkTime(skipCreditsOption, videoTime);
+
+    if (skip) {
+      const target = document.querySelector(selector);
+      if (target) {
+        target.click();
+        return;
+      }
+    }
   }
 }
 
@@ -127,4 +184,8 @@ chrome.storage.onChanged.addListener((changes, area) => {
 
 window.addEventListener("load", (event) => {
   setInterval(checkForElements, CHECK_INTERVAL_MS);
+
+  if (detectPlatform() === platforms.PRIME_VIDEO) {
+    setInterval(skipCredit, 1500);
+  }
 });

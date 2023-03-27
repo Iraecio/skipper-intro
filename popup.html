@@ -1,13 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Skip Intro Streaming</title>
-    <meta name="description" content="Extension to skip intros, recaps when watching Disney+, Star+, PrimeVideo, Netflix series.">
-    <meta name="keywords" content="Disney Plus Skipper,Star Plus Skipper, skip intro, skip recap, next episode, Disney Plus video, easy watch video, DisneyPlus skipping system">
-    <link rel="stylesheet" href="popup.min.css">
+    <meta
+      name="description"
+      content="Extension to skip intros, recaps when watching Disney+, Star+, PrimeVideo, Netflix series."
+    />
+    <meta
+      name="keywords"
+      content="Disney Plus Skipper,Star Plus Skipper, skip intro, skip recap, next episode, Disney Plus video, easy watch video, DisneyPlus skipping system"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css"
+      integrity="sha512-SzlrxWUlpfuzQ+pcUCosxcglQRNAq/DZjVsC0lE40xsADsfeQoEypE+enwcOiGjk/bSuGGKHEyjSoQ1zVisanQ=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <link rel="stylesheet" href="popup.css" />
   </head>
   <body>
     <div class="container">
@@ -15,23 +28,47 @@
         <div class="smallContainer">
           <div class="label">Skip recaps</div>
           <label class="switch">
-            <input type="checkbox" name="Recaps" id="Recaps">
+            <input type="checkbox" name="Recaps" id="Recaps" />
             <span class="slider"></span>
           </label>
         </div>
         <div class="smallContainer">
           <div class="label">Skip intro</div>
           <label class="switch">
-            <input type="checkbox" name="Intros" id="Intros">
+            <input type="checkbox" name="Intros" id="Intros" />
             <span class="slider"></span>
           </label>
         </div>
         <div class="smallContainer">
           <div class="label">Next episode</div>
           <label class="switch">
-            <input type="checkbox" name="NextEpisode" id="NextEpisode">
+            <input type="checkbox" name="NextEpisode" id="NextEpisode" />
             <span class="slider"></span>
           </label>
+        </div>
+        <div class="smallContainer">
+          <div class="label">
+            Skip Credits
+            <i
+              class="fa fa-info-circle"
+              aria-hidden="true"
+              title="Choose the missing time to jump to the next episode"
+            ></i>
+          </div>
+          <label>
+            <input
+              type="number"
+              name="SkipCredits"
+              id="SkipCredits"
+              step="1"
+              min="0"
+              max="59"
+              pattern="[0-5]?[0-9]"
+            />
+          </label>
+        </div>
+        <div class="smallContainer">
+          <a href="#">pay for a coffee</a>
         </div>
       </div>
     </div>

@@ -1,6 +1,6 @@
 {
   "name": "Skip Intro Streaming",
-  "version": "1.0",
+  "version": "1.1",
   "description": "Extensão pula introdução de animes e series em sites de streaming",
   "manifest_version": 3,
   "action": {
