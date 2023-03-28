@@ -2,9 +2,9 @@
     "version": "2.0.0",
     "tasks": [
       {
-        "label": "Launch firefox addon", // Name of task
+        "label": "Launch chrome addon", // Name of task
         "type": "shell",
-        "command": "cd firefox && web-ext run", // Enter your command here
+        "command": "cd chrome && web-ext run", // Enter your command here
         "group": "none",
         "presentation": {
           "reveal": "always",
