@@ -1,20 +1,10 @@
 <div align="center">
 
-<img src="firefox/icons/NetflixAmazon%20Auto-Skip.svg" width="10%">
+<img src="icons/Auto-Skip--400.png" width="10%">
 
-# Netflix/Prime Auto-Skip
+# Prime Auto-Skip
 
-Automatically skip Ads, intros, Credits, etc. on Prime video and Netflix.
-
-Firefox:
-<img src="https://img.shields.io/amo/dw/NetflixPrime@Autoskip.io" >
-<img src="https://img.shields.io/badge/installs-482-informational" >
-<img src="https://img.shields.io/amo/users/NetflixPrime@Autoskip.io" >
-<img src="https://img.shields.io/amo/rating/NetflixPrime@Autoskip.io" >
-Chrome: 
-<img src="https://img.shields.io/chrome-web-store/users/akaimhgappllmlkadblbdknhbfghdgle" >
-<img src="https://img.shields.io/badge/installs-249-informational" >
-<img src="https://img.shields.io/chrome-web-store/rating/akaimhgappllmlkadblbdknhbfghdgle" >
+Automatically skip Ads, intros, Credits, etc. on Prime video.
 
 </div>
 

@@ -1,15 +1,15 @@
 {
   "manifest_version": 3,
-  "name": "Netflix/Prime Auto-Skip",
-  "version": "1.0.29",
-  "description": "Automatically skip Ads, intros, Recaps, Credits, etc. on Netflix and Prime video.",
-  "homepage_url": "https://github.com/Dreamlinerm/Netflix-Prime-Auto-Skip",
+  "name": "Prime Auto-Skip",
+  "version": "1.0.0",
+  "description": "Automatically skip Ads, intros, Recaps, Credits, etc. on Prime video.",
+  "homepage_url": "https://github.com/Iraecio/skipper-intro",
   "icons": {
-    "16": "icons/NetflixAmazon Auto-Skip--16.png",
-    "48": "icons/NetflixAmazon Auto-Skip--48.png",
-    "96": "icons/NetflixAmazon Auto-Skip--96.png",
-    "128": "icons/NetflixAmazon Auto-Skip--128.png",
-    "400": "icons/NetflixAmazon Auto-Skip--400.png"
+    "16": "icons/Auto-Skip--16.png",
+    "48": "icons/Auto-Skip--48.png",
+    "96": "icons/Auto-Skip--96.png",
+    "128": "icons/Auto-Skip--128.png",
+    "400": "icons/Auto-Skip--400.png"
   },
   "content_scripts": [
     {
@@ -22,13 +22,13 @@
   "permissions": ["storage"],
   "action": {
     "default_icon": {
-      "16": "icons/NetflixAmazon Auto-Skip--16.png",
-      "48": "icons/NetflixAmazon Auto-Skip--48.png",
-      "96": "icons/NetflixAmazon Auto-Skip--96.png",
-      "128": "icons/NetflixAmazon Auto-Skip--128.png",
-      "400": "icons/NetflixAmazon Auto-Skip--400.png"
+      "16": "icons/Auto-Skip--16.png",
+      "48": "icons/Auto-Skip--48.png",
+      "96": "icons/Auto-Skip--96.png",
+      "128": "icons/Auto-Skip--128.png",
+      "400": "icons/Auto-Skip--400.png"
     },
-    "default_title": "Netflix/Prime Auto-Skip ",
+    "default_title": "Prime Auto-Skip ",
     "default_popup": "popup/popup.html"
   },
   "background": {
