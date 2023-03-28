@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="settings.css" />
+    <link href="https://fonts.googleapis.com/css?family=Lato" rel="stylesheet" />
+    <script src="settings.js" defer></script>
+  </head>
+  <body class="flex-center flex-col">
+    <div class="content">
+      <div class="flex-center flex-col line">
+        <div class="flex-center flex-row">
+          <div class="flex-center flex-col">
+            <h2 class="title">Settings</h2>
+            <p style="color: grey; font-size: 1em; text-align: center">Ver: 1.0.0</p>
+          </div>
+        </div>
+      </div>
+      <div class="categoryPrime">
+        <!-- show on click -->
+        <div id="AmazonSettings">
+          <div class="line flex">
+            <p>Skip Intro:</p>
+            <label class="switch">
+              <input type="checkbox" id="AmazonIntro" />
+              <span class="slider round"></span>
+            </label>
+          </div>
+          <div class="line flex">
+            <p>Skip Credits:</p>
+            <label class="switch">
+              <input type="checkbox" id="AmazonCredits" />
+              <span class="slider round"></span>
+            </label>
+          </div>
+          <div class="line flex">
+            <p>Skip Self Ads:</p>
+            <label class="switch">
+              <input type="checkbox" id="AmazonAds" />
+              <span class="slider round"></span>
+            </label>
+          </div>
+          <div class="line flex">
+            <p>Skip Freevee Ads:</p>
+            <label class="switch">
+              <input type="checkbox" id="AmazonFreevee" />
+              <span class="slider round"></span>
+            </label>
+          </div>
+          <div class="line flex">
+            <p>Add Speed Slider:</p>
+            <label class="switch">
+              <input type="checkbox" id="AmazonSpeedSlider" />
+              <span class="slider round"></span>
+            </label>
+          </div>
+          <div class="line flex">
+            <p>Remove paid content:</p>
+            <label class="switch">
+              <input type="checkbox" id="AmazonfilterPaid" />
+              <span class="slider round"></span>
+            </label>
+          </div>
+        </div>
+      </div>
+      <div class="flex">
+        <a
+          class="button donate"
+          href="https://www.paypal.com/donate/?business=3RYBFSHKT8868&no_recurring=0&item_name=Sua+doação+será+usada+para+otimizar+o+nosso+entretenimento+&currency_code=BRL"
+          target="_blank"
+          >Buy a Coffee</a
+        >
+      </div>
+      <div id="error-content" class="hidden">
+        <p>Pop-up not working on this page.</p>
+        <p>Try the Amazon/Netflix page.</p>
+      </div>
+    </div>
+  </body>
+</html>
