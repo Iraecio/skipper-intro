@@ -133,7 +133,7 @@ if (isVideo || isNetflix) {
       increaseBadge();
     }
   }
-  
+
   function addRecapTimeSkipped(startTime, endTime) {
     if (typeof startTime === "number" && typeof endTime === "number" && endTime > startTime) {
       console.log("Recap Time skipped", endTime - startTime);
