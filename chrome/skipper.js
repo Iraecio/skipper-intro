@@ -1,5 +1,5 @@
 let hostname = window.location.hostname;
-let isAmazon = /amazon|primevideo/i.test(hostname);
+let isAmazon = /primevideo/i.test(hostname);
 const version = "1.0.0";
 
 if (isAmazon) {
@@ -11,7 +11,6 @@ if (isAmazon) {
   };
   let settings = defaultSettings.settings;
   let lastAdTimeText = "";
-  resetBadge();
 
   chrome.storage.sync.get("settings", function (result) {
     settings = result.settings;
@@ -70,20 +69,6 @@ if (isAmazon) {
     }
   });
 
-  function addIntroTimeSkipped(startTime, endTime) {
-    if (typeof startTime === "number" && typeof endTime === "number" && endTime > startTime) {
-      console.log("Intro Time skipped", endTime - startTime);
-      increaseBadge();
-    }
-  }
-
-  function addRecapTimeSkipped(startTime, endTime) {
-    if (typeof startTime === "number" && typeof endTime === "number" && endTime > startTime) {
-      console.log("Recap Time skipped", endTime - startTime);
-      increaseBadge();
-    }
-  }
-
   // Observers
   // default Options for the observer (which mutations to observe)
   const config = { attributes: true, childList: true, subtree: true };
@@ -95,7 +80,7 @@ if (isAmazon) {
     let video = document.querySelector("#dv-web-player > div > div:nth-child(1) > div > div > div.scalingVideoContainer > div.scalingVideoContainerBottom > div > video");
     let alreadySlider = document.querySelector("#videoSpeedSlider");
 
-    // remove bad background hue which is annoying
+    //remove bad background hue which is annoying
     //document.querySelector(".fkpovp9.f8hspre").style.background = "rgba(0, 0, 0, 0.25)";
     let b = document.querySelector(".fkpovp9.f8hspre");
     if (b && b.style.background != "rgba(0, 0, 0, 0.25)") {
@@ -138,7 +123,7 @@ if (isAmazon) {
         position.insertBefore(slider, position.firstChild);
 
         speed.setAttribute("id", "videoSpeed");
-        speed.setAttribute("textContent", "1.0x");
+        speed.textContent = "1.0x";
 
         svg.onclick = function () {
           if (slider.style.display === "block") slider.style.display = "none";
@@ -147,10 +132,8 @@ if (isAmazon) {
 
         position.insertBefore(speed, position.firstChild);
 
+        slider.addEventListener("click", toggleSliderDisplay.bind(this, video, speed), false);
         slider.addEventListener("input", updatePlaybackRate.bind(this, video, speed), false);
-
-        speed.onclick = toggleSliderDisplay;
-        slider.oninput = updatePlaybackRate;
 
       } else {
         // need to resync the slider with the video sometimes
@@ -202,51 +185,14 @@ if (isAmazon) {
   }
 
   const AmazonSkipIntroConfig = { attributes: true, attributeFilter: [".skipelement"], subtree: true, childList: true, attributeOldValue: false };
-  // const AmazonSkipIntro = new RegExp("skipelement", "i");
   const AmazonSkipIntroObserver = new MutationObserver(Amazon_Intro);
   function Amazon_Intro(mutations, observer) {
-    let button = document.querySelector("[class*=skipelement]");
+    let button = document.querySelector(".atvwebplayersdk-skipelement-button");
     if (button) {
-      let video = document.querySelector("#dv-web-player > div > div:nth-child(1) > div > div > div.scalingVideoContainer > div.scalingVideoContainerBottom > div > video");
-      const time = video.currentTime;
-      button.click();
-      console.log("Intro skipped", button);
-      //delay where the video is loaded
       setTimeout(function () {
-        AmazonGobackbutton(video, time, video.currentTime);
-        addIntroTimeSkipped(time, video.currentTime);
-      }, 50);
-    }
-  }
-  reverseButton = false;
-  function AmazonGobackbutton(video, startTime, endTime) {
-    if (!reverseButton) {
-      reverseButton = true;
-      // go back button
-      const button = document.createElement("button");
-      button.style = "padding: 0px 22px; line-height: normal; min-width: 0px";
-      button.setAttribute("class", "fqye4e3 f1ly7q5u fk9c3ap fz9ydgy f1xrlb00 f1hy0e6n fgbpje3 f1uteees f1h2a8xb  f1cg7427 fiqc9rt fg426ew f1ekwadg");
-      button.setAttribute("data-uia", "reverse-button");
-      button.textContent = "Watch skipped ?";
-      document.querySelector(".f18oq18q.f6suwnu.fhxjtbc.f1ngx5al").appendChild(button);
-      buttonInHTML = document.querySelector('[data-uia="reverse-button"]');
-      function goBack() {
-        video.currentTime = startTime;
-        buttonInHTML.remove();
-        console.log("stopped observing| Intro");
-        AmazonSkipIntroObserver.disconnect();
-        waitTime = endTime - startTime + 2;
-        // console.log("waiting for:", waitTime);
-        setTimeout(function () {
-          console.log("restarted observing| Intro");
-          AmazonSkipIntroObserver.observe(document, AmazonSkipIntroConfig);
-        }, waitTime * 1000);
-      }
-      buttonInHTML.addEventListener("click", goBack);
-      setTimeout(() => {
-        buttonInHTML.remove();
-        reverseButton = false;
-      }, 5000);
+        button.click();
+      }, 3000); // 3 secs to no crash stream
+      console.info("Intro skipped");
     }
   }
 
@@ -263,7 +209,6 @@ if (isAmazon) {
             let newEpNumber = document.querySelector("[class*=nextupcard-episode]");
             if (newEpNumber && !newEpNumber.textContent.match(/(?<!\S)1(?!\S)/)) {
               button.click();
-              increaseBadge();
               console.log("skipped Credits", button);
             }
             return;
@@ -284,7 +229,6 @@ if (isAmazon) {
         let skipTime = Math.min(adTime - 1, MAX_SKIP_TIME);
         video.currentTime += skipTime;
         console.info("FreeVee Ad skipped, length:", skipTime, "s");
-        increaseBadge();
       }
     }
   }
@@ -304,12 +248,14 @@ if (isAmazon) {
       }
     }, 100);
   }
+
   async function resetLastATimeText(time = 1000) {
     // timeout of 1 second to make sure the button is not pressed too fast, it will crash or slow the website otherwise
     setTimeout(() => {
       lastAdTimeText = "";
     }, time);
   }
+
   async function Amazon_AdTimeout() {
     // set loop every 1 sec and check if ad is there
     let AdInterval = setInterval(function () {
@@ -337,7 +283,6 @@ if (isAmazon) {
               setTimeout(() => {
                 if (button) {
                   button.click();
-                  increaseBadge();
                   console.log("Self Ad skipped, length:", adTime, button);
                 }
               }, 100);
@@ -419,6 +364,7 @@ if (isAmazon) {
       document.querySelector("#speedbutton")?.remove();
     }
   }
+
   async function startAmazonFilterPaidObserver() {
     if (settings.Amazon.filterPaid === undefined || settings.Amazon.filterPaid) {
       console.log("started filtering| Paid films");
@@ -429,6 +375,7 @@ if (isAmazon) {
       AmazonFilterPaidObserver.disconnect();
     }
   }
+
   async function startAmazonSkipIntroObserver() {
     if (settings.Amazon.skipIntro === undefined || settings.Amazon.skipIntro) {
       console.log("started observing| Intro");
@@ -439,9 +386,6 @@ if (isAmazon) {
         button.click();
         console.log("Intro skipped", button);
         //delay where the video is loaded
-        setTimeout(function () {
-          addIntroTimeSkipped(time, video.currentTime);
-        }, 50);
       }
       AmazonSkipIntroObserver.observe(document, AmazonSkipIntroConfig);
     } else {
@@ -449,6 +393,7 @@ if (isAmazon) {
       AmazonSkipIntroObserver.disconnect();
     }
   }
+
   async function startAmazonSkipCreditsObserver() {
     if (settings.Amazon.skipCredits === undefined || settings.Amazon.skipCredits) {
       console.log("started observing| Credits");
@@ -468,39 +413,20 @@ if (isAmazon) {
       AmazonSkipCreditsObserver.disconnect();
     }
   }
+
   async function startAmazonSkipAdObserver() {
     if (settings.Amazon.skipAd === undefined || settings.Amazon.skipAd) {
       console.log("started observing| Self Ad");
       Amazon_AdTimeout();
     }
   }
+
   async function startAmazonBlockFreeveeObserver() {
     if (settings.Amazon.blockFreevee === undefined || settings.Amazon.blockFreevee) {
       console.log("started observing| FreeVee Ad");
       // AmazonFreeVeeObserver.observe(document, FreeVeeConfig);
       Amazon_FreeveeTimeout();
     }
-  }
-
-  // Badge functions
-  function setBadgeText(text) {
-    chrome.runtime.sendMessage({
-      type: "setBadgeText",
-      content: text,
-    });
-  }
-
-  function increaseBadge() {
-    chrome.storage.sync.set({ settings });
-    chrome.runtime.sendMessage({
-      type: "increaseBadge",
-    });
-  }
-
-  function resetBadge() {
-    chrome.runtime.sendMessage({
-      type: "resetBadge",
-    });
   }
 
 }
