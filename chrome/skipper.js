@@ -1,49 +1,56 @@
-let hostname = window.location.hostname;
-let isAmazon = /primevideo/i.test(hostname);
+const isPrimeVideo = window.location.hostname.includes('primevideo');
 const version = "1.0.0";
 
-if (isAmazon) {
+if (isPrimeVideo) {
+
   // global variables in localStorage
   const defaultSettings = {
     settings: {
-      Amazon: { skipIntro: true, skipCredits: true, skipAd: true, blockFreevee: true, speedSlider: true, filterPaid: false },
+      PrimeVideo: { skipIntro: true, skipCredits: true, skipAd: true, blockFreevee: true, speedSlider: true, filterPaid: false },
     },
   };
+
   let settings = defaultSettings.settings;
   let lastAdTimeText = "";
 
-  chrome.storage.sync.get("settings", function (result) {
-    settings = result.settings;
+  chrome.storage.sync.get("settings", ({ settings }) => {
     console.info("Prime Auto-Skip Ver:", version);
     console.info("Settings", settings);
+
     if (typeof settings !== "object") {
       chrome.storage.sync.set(defaultSettings);
     } else {
-      if (settings.Amazon?.skipIntro) startAmazonSkipIntroObserver();
-      if (settings.Amazon?.skipCredits) startAmazonSkipCreditsObserver();
-      if (settings.Amazon?.skipAd) startAmazonSkipAdObserver();
-      if (settings.Amazon?.blockFreevee) {
-        // timeout of 100 ms because the ad is not loaded fast enough and the video will crash
-        setTimeout(function () {
-          startAmazonBlockFreeveeObserver();
-        }, 200);
+      // Percorre todos os campos do objeto settings 
+      if (JSON.stringify(Object.keys(defaultSettings.settings)) !== JSON.stringify(Object.keys(settings))) {
+        for (let key in settings) {
+          if (key !== 'PrimeVideo') {
+            delete settings[key];
+          }
+        }
+        chrome.storage.sync.set({ settings });
       }
-      if (settings.Amazon?.speedSlider) startAmazonSpeedSliderObserver();
-      if (settings.Amazon?.filterPaid) startAmazonFilterPaidObserver();
 
-      // if there is an undefined setting, set it to the default
+
+      settings.PrimeVideo?.skipIntro && startAmazonSkipIntroObserver();
+      settings.PrimeVideo?.skipCredits && startAmazonSkipCreditsObserver();
+      settings.PrimeVideo?.skipAd && startAmazonSkipAdObserver();
+      settings.PrimeVideo?.blockFreevee && setTimeout(() => startAmazonBlockFreeveeObserver(), 200);
+      settings.PrimeVideo?.speedSlider && startAmazonSpeedSliderObserver();
+      settings.PrimeVideo?.filterPaid && startAmazonFilterPaidObserver();
+
+      // set any undefined setting to the default
       let changedSettings = false;
-      for (const key in defaultSettings.settings) {
-        if (typeof settings[key] === "undefined") {
+      for (const [key, value] of Object.entries(defaultSettings.settings)) {
+        if (!settings[key]) {
           console.log("undefined Setting:", key);
+          settings[key] = value;
           changedSettings = true;
-          settings[key] = defaultSettings.settings[key];
         } else {
-          for (const subkey in defaultSettings.settings[key]) {
+          for (const [subkey, subvalue] of Object.entries(defaultSettings.settings[key])) {
             if (typeof settings[key][subkey] === "undefined") {
               console.log("undefined Setting:", key, subkey);
+              settings[key][subkey] = subvalue;
               changedSettings = true;
-              settings[key][subkey] = defaultSettings.settings[key][subkey];
             }
           }
         }
@@ -54,19 +61,14 @@ if (isAmazon) {
     }
   });
 
-  chrome.storage.sync.onChanged.addListener(function (changes, namespace) {
-    for (let [key, { oldValue, newValue }] of Object.entries(changes)) {
-      if (key == "settings") {
-        settings = newValue;
-        console.log(key, "Old value:", oldValue, ", new value:", newValue);
-        if (oldValue === undefined || newValue.Amazon.skipIntro !== oldValue.Amazon.skipIntro) startAmazonSkipIntroObserver();
-        if (oldValue === undefined || newValue.Amazon.skipCredits !== oldValue.Amazon.skipCredits) startAmazonSkipCreditsObserver();
-        if (oldValue === undefined || newValue.Amazon.skipAd !== oldValue.Amazon.skipAd) startAmazonSkipAdObserver();
-        if (oldValue === undefined || newValue.Amazon.blockFreevee !== oldValue.Amazon.blockFreevee) startAmazonBlockFreeveeObserver();
-        if (oldValue === undefined || newValue.Amazon.speedSlider !== oldValue.Amazon.speedSlider) startAmazonSpeedSliderObserver();
-        if (oldValue === undefined || newValue.Amazon.filterPaid !== oldValue.Amazon.filterPaid) startAmazonFilterPaidObserver();
-      }
-    }
+  chrome.storage.sync.onChanged.addListener(function ({ settings: { oldValue, newValue } }) {
+    console.log("Old value:", oldValue, ", new value:", newValue);
+    if (!oldValue || newValue.PrimeVideo.skipIntro !== oldValue.PrimeVideo.skipIntro) startAmazonSkipIntroObserver();
+    if (!oldValue || newValue.PrimeVideo.skipCredits !== oldValue.PrimeVideo.skipCredits) startAmazonSkipCreditsObserver();
+    if (!oldValue || newValue.PrimeVideo.skipAd !== oldValue.PrimeVideo.skipAd) startAmazonSkipAdObserver();
+    if (!oldValue || newValue.PrimeVideo.blockFreevee !== oldValue.PrimeVideo.blockFreevee) startAmazonBlockFreeveeObserver();
+    if (!oldValue || newValue.PrimeVideo.speedSlider !== oldValue.PrimeVideo.speedSlider) startAmazonSpeedSliderObserver();
+    if (!oldValue || newValue.PrimeVideo.filterPaid !== oldValue.PrimeVideo.filterPaid) startAmazonFilterPaidObserver();
   });
 
   // Observers
@@ -81,10 +83,10 @@ if (isAmazon) {
     let alreadySlider = document.querySelector("#videoSpeedSlider");
 
     //remove bad background hue which is annoying
-    //document.querySelector(".fkpovp9.f8hspre").style.background = "rgba(0, 0, 0, 0.25)";
-    let b = document.querySelector(".fkpovp9.f8hspre");
-    if (b && b.style.background != "rgba(0, 0, 0, 0.25)") {
-      b.style.background = "rgba(0, 0, 0, 0.25)";
+    const BACKGROUND_OPACITY = 0.25;
+    let element = document.querySelector(".fkpovp9.f8hspre");
+    if (element && element.style && element.style.background !== `rgba(0, 0, 0, ${BACKGROUND_OPACITY})`) {
+      element.style.background = `rgba(0, 0, 0, ${BACKGROUND_OPACITY})`;
     }
 
     if (video) {
@@ -187,36 +189,60 @@ if (isAmazon) {
   const AmazonSkipIntroConfig = { attributes: true, attributeFilter: [".skipelement"], subtree: true, childList: true, attributeOldValue: false };
   const AmazonSkipIntroObserver = new MutationObserver(Amazon_Intro);
   function Amazon_Intro(mutations, observer) {
-    let button = document.querySelector(".atvwebplayersdk-skipelement-button");
-    if (button) {
-      setTimeout(function () {
-        button.click();
-      }, 3000); // 3 secs to no crash stream
-      console.info("Intro skipped");
-    }
-  }
-
-  const AmazonSkipCreditsConfig = { attributes: true, attributeFilter: [".nextupcard"], subtree: true, childList: true, attributeOldValue: false };
-  const AmazonSkipCredits = new RegExp("nextupcard", "i");
-  const AmazonSkipCredits2 = new RegExp("nextupcard-button", "i");
-  const AmazonSkipCreditsObserver = new MutationObserver(Amazon_Credits);
-  function Amazon_Credits(mutations, observer) {
     for (let mutation of mutations) {
-      if (AmazonSkipCredits.test(mutation.target.classList.toString())) {
-        for (let button of mutation?.target?.firstChild?.childNodes) {
-          if (button && AmazonSkipCredits2.test(button.classList.toString())) {
-            // only skipping to next episode not an entirely new series
-            let newEpNumber = document.querySelector("[class*=nextupcard-episode]");
-            if (newEpNumber && !newEpNumber.textContent.match(/(?<!\S)1(?!\S)/)) {
-              button.click();
-              console.log("skipped Credits", button);
-            }
-            return;
-          }
+      if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
+        const button = mutation.addedNodes[0].querySelector('.atvwebplayersdk-skipelement-button');
+        if (button) {
+          const waitForButton = () => new Promise(resolve => {
+            const checkButton = () => {
+              if (button.disabled === false) {
+                resolve();
+              } else {
+                setTimeout(checkButton, 100);
+              }
+            };
+            checkButton();
+          });
+
+          waitForButton().then(() => {
+            button.click();
+            console.info("Intro skipped");
+          });
         }
       }
     }
   }
+
+  AmazonSkipIntroObserver.observe(document.body, AmazonSkipIntroConfig);
+
+
+  const AmazonSkipCreditsConfig = { attributes: true, attributeFilter: [".nextupcard"], subtree: true, childList: true, attributeOldValue: false };
+  const AmazonSkipCreditsObserver = new MutationObserver(Amazon_Credits);
+  function Amazon_Credits(mutations, observer) {
+    // Percorre cada mutação que ocorreu
+    for (let { target } of mutations) {
+      // Se o elemento mutado corresponde à classe ".nextupcard"
+      if (target.matches(".nextupcard")) {
+        // Encontra o botão de "próximo episódio"
+        let nextButton = target.querySelector(".nextupcard-button");
+        // Se o botão foi encontrado
+        if (nextButton) {
+          // Encontra o número do próximo episódio
+          let nextEpNumber = target.querySelector(".nextupcard-episode");
+          // Se o número do próximo episódio não for 1, clica no botão
+          if (nextEpNumber && /\d+/.test(nextEpNumber.textContent) && parseInt(nextEpNumber.textContent.trim()) !== 1) {
+            nextButton.click();
+            console.info("Skipped credits for next episode.", nextButton);
+          }
+          return;
+        }
+      }
+    }
+  }
+  // Inicia o observador
+  AmazonSkipCreditsObserver.observe(document.body, AmazonSkipCreditsConfig);
+
+
 
   const MAX_SKIP_TIME = 20;
   function skipAd(video) {
@@ -236,7 +262,7 @@ if (isAmazon) {
   async function Amazon_FreeveeTimeout() {
     // set loop every 1 sec and check if ad is there
     let AdInterval = setInterval(function () {
-      if (!settings.Amazon.blockFreevee) {
+      if (!settings.PrimeVideo.blockFreevee) {
         console.log("stopped observing| FreeVee Ad");
         clearInterval(AdInterval);
         return;
@@ -259,7 +285,7 @@ if (isAmazon) {
   async function Amazon_AdTimeout() {
     // set loop every 1 sec and check if ad is there
     let AdInterval = setInterval(function () {
-      if (!settings.Amazon.skipAd) {
+      if (!settings.PrimeVideo.skipAd) {
         console.log("stopped observing| Self Ad");
         clearInterval(AdInterval);
         return;
@@ -295,7 +321,7 @@ if (isAmazon) {
 
   // start/stop the observers depending on settings
   async function startAmazonSpeedSliderObserver() {
-    if (settings.Amazon.speedSlider === undefined || settings.Amazon.speedSlider) {
+    if (settings.PrimeVideo.speedSlider === undefined || settings.PrimeVideo.speedSlider) {
       let video = document.querySelector("#dv-web-player > div > div:nth-child(1) > div > div > div.scalingVideoContainer > div.scalingVideoContainerBottom > div > video");
       let alreadySlider = document.querySelector("#videoSpeedSlider");
 
@@ -366,7 +392,7 @@ if (isAmazon) {
   }
 
   async function startAmazonFilterPaidObserver() {
-    if (settings.Amazon.filterPaid === undefined || settings.Amazon.filterPaid) {
+    if (settings.PrimeVideo.filterPaid === undefined || settings.PrimeVideo.filterPaid) {
       console.log("started filtering| Paid films");
 
       AmazonFilterPaidObserver.observe(document, AmazonFilterPaidConfig);
@@ -376,26 +402,20 @@ if (isAmazon) {
     }
   }
 
+  //chatgpt
   async function startAmazonSkipIntroObserver() {
-    if (settings.Amazon.skipIntro === undefined || settings.Amazon.skipIntro) {
-      console.log("started observing| Intro");
-      let button = document.querySelector("[class*=skipelement]");
-      if (button) {
-        let video = document.querySelector("#dv-web-player > div > div:nth-child(1) > div > div > div.scalingVideoContainer > div.scalingVideoContainerBottom > div > video");
-        const time = video.currentTime;
-        button.click();
-        console.log("Intro skipped", button);
-        //delay where the video is loaded
-      }
-      AmazonSkipIntroObserver.observe(document, AmazonSkipIntroConfig);
+    const skipIntroSetting = settings.PrimeVideo.skipIntro;
+    if (skipIntroSetting === undefined || skipIntroSetting) {
+      console.info("started observing| Intro");
+      AmazonSkipIntroObserver.observe(document.body, AmazonSkipIntroConfig);
     } else {
-      console.log("stopped observing| Intro");
+      console.info("stopped observing| Intro");
       AmazonSkipIntroObserver.disconnect();
     }
   }
 
   async function startAmazonSkipCreditsObserver() {
-    if (settings.Amazon.skipCredits === undefined || settings.Amazon.skipCredits) {
+    if (settings.PrimeVideo.skipCredits === undefined || settings.PrimeVideo.skipCredits) {
       console.log("started observing| Credits");
       let button = document.querySelector("[class*=nextupcard-button]");
       if (button) {
@@ -415,14 +435,14 @@ if (isAmazon) {
   }
 
   async function startAmazonSkipAdObserver() {
-    if (settings.Amazon.skipAd === undefined || settings.Amazon.skipAd) {
+    if (settings.PrimeVideo.skipAd === undefined || settings.PrimeVideo.skipAd) {
       console.log("started observing| Self Ad");
       Amazon_AdTimeout();
     }
   }
 
   async function startAmazonBlockFreeveeObserver() {
-    if (settings.Amazon.blockFreevee === undefined || settings.Amazon.blockFreevee) {
+    if (settings.PrimeVideo.blockFreevee === undefined || settings.PrimeVideo.blockFreevee) {
       console.log("started observing| FreeVee Ad");
       // AmazonFreeVeeObserver.observe(document, FreeVeeConfig);
       Amazon_FreeveeTimeout();

@@ -1,7 +1,7 @@
 // global variables in localStorage
 const defaultSettings = {
   settings: {
-    Amazon: { skipIntro: true, skipCredits: true, skipAd: true, blockFreevee: true, speedSlider: true, filterPaid: false },
+    PrimeVideo: { skipIntro: true, skipCredits: true, skipAd: true, blockFreevee: true, speedSlider: true, filterPaid: false },
   },
 };
 
@@ -64,25 +64,6 @@ function setCheckboxesToSettings() {
   setCheckboxToSetting("AmazonfilterPaid", amazonSettings?.filterPaid);
 }
 
-// open and close the Amazon Individual Settings
-const settingsContainer = document.getElementById("AmazonSettings");
-const downArrow = document.getElementsByClassName("AmazonDownArrow")[0];
-const upArrow = document.getElementsByClassName("AmazonUpArrow")[0];
-
-function AmazonSettings(open = true) {
-  if (open) {
-    settingsContainer.classList.add("visible");
-    settingsContainer.classList.remove("hidden");
-    downArrow.classList.add("hidden");
-    upArrow.classList.remove("hidden");
-  } else {
-    settingsContainer.classList.add("hidden");
-    settingsContainer.classList.remove("visible");
-    downArrow.classList.remove("hidden");
-    upArrow.classList.add("hidden");
-  }
-}
-
 /**
  * Listen for clicks on the buttons, and send the appropriate message to
  * the content script in the page.
@@ -91,33 +72,33 @@ function listenForClicks() {
   const listener = document.addEventListener("click", (e) => {
     const { Amazon } = settings;
     if (e.target.classList.contains("reset")) {
-      console.log("settings reset to", defaultSettings);
+      console.info("settings reset to", defaultSettings);
       chrome.storage.sync.set(defaultSettings);
     } else if (e.target.id === "openAmazonSettings") {
       AmazonSettings(document.getElementById("AmazonSettings").style.display === "none");
     } else if (e.target.id === "AmazonCredits") {
       Amazon.skipCredits = !Amazon.skipCredits;
-      console.log(`settings.Amazon.skipCredits: ${Amazon.skipCredits}`);
+      console.info(`settings.PrimeVideo.skipCredits: ${Amazon.skipCredits}`);
       chrome.storage.sync.set({ settings });
     } else if (e.target.id === "AmazonIntro") {
       Amazon.skipIntro = !Amazon.skipIntro;
-      console.log(`settings.Amazon.skipIntro: ${Amazon.skipIntro}`);
+      console.info(`settings.PrimeVideo.skipIntro: ${Amazon.skipIntro}`);
       chrome.storage.sync.set({ settings });
     } else if (e.target.id === "AmazonAds") {
       Amazon.skipAd = !Amazon.skipAd;
-      console.log(`settings.Amazon.skipAd: ${Amazon.skipAd}`);
+      console.info(`settings.PrimeVideo.skipAd: ${Amazon.skipAd}`);
       chrome.storage.sync.set({ settings });
     } else if (e.target.id === "AmazonFreevee") {
       Amazon.blockFreevee = !Amazon.blockFreevee;
-      console.log(`settings.Amazon.blockFreevee: ${Amazon.blockFreevee}`);
+      console.info(`settings.PrimeVideo.blockFreevee: ${Amazon.blockFreevee}`);
       chrome.storage.sync.set({ settings });
     } else if (e.target.id === "AmazonSpeedSlider") {
       Amazon.speedSlider = !Amazon.speedSlider;
-      console.log(`settings.Amazon.speedSlider: ${Amazon.speedSlider}`);
+      console.info(`settings.PrimeVideo.speedSlider: ${Amazon.speedSlider}`);
       chrome.storage.sync.set({ settings });
     } else if (e.target.id === "AmazonfilterPaid") {
       Amazon.filterPaid = !Amazon.filterPaid;
-      console.log(`settings.Amazon.filterPaid: ${Amazon.filterPaid}`);
+      console.info(`settings.PrimeVideo.filterPaid: ${Amazon.filterPaid}`);
       chrome.storage.sync.set({ settings });
     }
   });
