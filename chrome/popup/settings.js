@@ -55,13 +55,13 @@ function setCheckboxToSetting(id, setting) {
 }
 
 function setCheckboxesToSettings() {
-  const amazonSettings = settings?.Amazon;
-  setCheckboxToSetting("AmazonIntro", amazonSettings?.skipIntro);
-  setCheckboxToSetting("AmazonCredits", amazonSettings?.skipCredits);
-  setCheckboxToSetting("AmazonAds", amazonSettings?.skipAd);
-  setCheckboxToSetting("AmazonFreevee", amazonSettings?.blockFreevee);
-  setCheckboxToSetting("AmazonSpeedSlider", amazonSettings?.speedSlider);
-  setCheckboxToSetting("AmazonfilterPaid", amazonSettings?.filterPaid);
+  const primevideoSettings = settings?.PrimeVideo;
+  setCheckboxToSetting("PrimeVideoIntro", primevideoSettings?.skipIntro);
+  setCheckboxToSetting("PrimeVideoCredits", primevideoSettings?.skipCredits);
+  setCheckboxToSetting("PrimeVideoAds", primevideoSettings?.skipAd);
+  setCheckboxToSetting("PrimeVideoFreevee", primevideoSettings?.blockFreevee);
+  setCheckboxToSetting("PrimeVideoSpeedSlider", primevideoSettings?.speedSlider);
+  setCheckboxToSetting("PrimeVideofilterPaid", primevideoSettings?.filterPaid);
 }
 
 /**
@@ -69,37 +69,58 @@ function setCheckboxesToSettings() {
  * the content script in the page.
  */
 function listenForClicks() {
-  const listener = document.addEventListener("click", (e) => {
-    const { Amazon } = settings;
-    if (e.target.classList.contains("reset")) {
-      console.info("settings reset to", defaultSettings);
-      chrome.storage.sync.set(defaultSettings);
-    } else if (e.target.id === "openAmazonSettings") {
-      AmazonSettings(document.getElementById("AmazonSettings").style.display === "none");
-    } else if (e.target.id === "AmazonCredits") {
-      Amazon.skipCredits = !Amazon.skipCredits;
-      console.info(`settings.PrimeVideo.skipCredits: ${Amazon.skipCredits}`);
-      chrome.storage.sync.set({ settings });
-    } else if (e.target.id === "AmazonIntro") {
-      Amazon.skipIntro = !Amazon.skipIntro;
-      console.info(`settings.PrimeVideo.skipIntro: ${Amazon.skipIntro}`);
-      chrome.storage.sync.set({ settings });
-    } else if (e.target.id === "AmazonAds") {
-      Amazon.skipAd = !Amazon.skipAd;
-      console.info(`settings.PrimeVideo.skipAd: ${Amazon.skipAd}`);
-      chrome.storage.sync.set({ settings });
-    } else if (e.target.id === "AmazonFreevee") {
-      Amazon.blockFreevee = !Amazon.blockFreevee;
-      console.info(`settings.PrimeVideo.blockFreevee: ${Amazon.blockFreevee}`);
-      chrome.storage.sync.set({ settings });
-    } else if (e.target.id === "AmazonSpeedSlider") {
-      Amazon.speedSlider = !Amazon.speedSlider;
-      console.info(`settings.PrimeVideo.speedSlider: ${Amazon.speedSlider}`);
-      chrome.storage.sync.set({ settings });
-    } else if (e.target.id === "AmazonfilterPaid") {
-      Amazon.filterPaid = !Amazon.filterPaid;
-      console.info(`settings.PrimeVideo.filterPaid: ${Amazon.filterPaid}`);
-      chrome.storage.sync.set({ settings });
+  document.addEventListener("click", (e) => {
+    const { PrimeVideo } = settings;
+
+    switch (e.target.id) {
+      case "openPrimeVideoSettings":
+        // Toggle PrimeVideoSettings display
+        PrimeVideoSettings(document.getElementById("PrimeVideoSettings").style.display === "none");
+        break;
+      case "PrimeVideoCredits":
+        // Toggle skipCredits setting
+        PrimeVideo.skipCredits = !PrimeVideo.skipCredits;
+        console.info(`settings.PrimeVideo.skipCredits: ${PrimeVideo.skipCredits}`);
+        chrome.storage.sync.set({ settings });
+        break;
+      case "PrimeVideoIntro":
+        // Toggle skipIntro setting
+        PrimeVideo.skipIntro = !PrimeVideo.skipIntro;
+        console.info(`settings.PrimeVideo.skipIntro: ${PrimeVideo.skipIntro}`);
+        chrome.storage.sync.set({ settings });
+        break;
+      case "PrimeVideoAds":
+        // Toggle skipAd setting
+        PrimeVideo.skipAd = !PrimeVideo.skipAd;
+        console.info(`settings.PrimeVideo.skipAd: ${PrimeVideo.skipAd}`);
+        chrome.storage.sync.set({ settings });
+        break;
+      case "PrimeVideoFreevee":
+        // Toggle blockFreevee setting
+        PrimeVideo.blockFreevee = !PrimeVideo.blockFreevee;
+        console.info(`settings.PrimeVideo.blockFreevee: ${PrimeVideo.blockFreevee}`);
+        chrome.storage.sync.set({ settings });
+        break;
+      case "PrimeVideoSpeedSlider":
+        // Toggle speedSlider setting
+        PrimeVideo.speedSlider = !PrimeVideo.speedSlider;
+        console.info(`settings.PrimeVideo.speedSlider: ${PrimeVideo.speedSlider}`);
+        chrome.storage.sync.set({ settings });
+        break;
+      case "PrimeVideofilterPaid":
+        // Toggle filterPaid setting
+        PrimeVideo.filterPaid = !PrimeVideo.filterPaid;
+        console.info(`settings.PrimeVideo.filterPaid: ${PrimeVideo.filterPaid}`);
+        chrome.storage.sync.set({ settings });
+        break;
+      case "reset":
+        // Reset settings to default
+        console.info("settings reset to", defaultSettings);
+        chrome.storage.sync.set(defaultSettings);
+        break;
+      default:
+        // Do nothing for other clicks
+        break;
     }
   });
 }
@@ -115,7 +136,7 @@ function reportExecuteScriptError(error) {
   const errorContent = document.querySelector("#error-content");
   errorContent.classList.remove("hidden");
 
-  console.error(`Primeskip content script failed to execute: ${error.message}`);
+  console.error(`Prime skip content script failed to execute: ${error.message}`);
   console.error(`Error stack: ${error.stack}`);
   console.error(`Error name: ${error.name}`);
   console.error(`Error filename: ${error.filename}`);
