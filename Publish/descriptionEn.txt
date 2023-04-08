@@ -1,86 +1,20 @@
--------------------------------------------- firefox:
-You can configure which Feature to enable in the Settings Page.
-
 ✨ Features
-
-Netflix Automatically skipping:
-
-<ul>
-<li>Intros</li>
-<li>Recaps</li>
-<li>Credits&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: automatically goes to the next episode</li>
-<li>Inactivity Warning&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: automatically resuming the video</li>
-<li>Basic tier Ads</li>
-</ul>
-
-Amazon Prime video Automatically skipping:
-
-<ul>
-<li>Intros</li>
-<li>Credits &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: automatically goes to the next episode</li>
-<li>Freevee ads</li>
-<li>Self promoting ads</li>
-</ul>
-
-Amazon Prime video other features:
-
-<ul>
-<li>Filtering paid content (movies, series)</li>
-<li>Adding playback speed control to UI</li>
-<li>Remove annoying blur when hovering over video</li>
-</ul>
-
-☔ Safe
-
-The extension is open sourced! Check <a href="https://github.com/Dreamlinerm/Netflix-Prime-Auto-Skip" target="_blank">Github</a> out if you want to contribute.
-
-💕 Enjoying Netflix/Prime Auto-Skip?
-
-Leave a 5 star review! Reviews help build trust and attract new users!
-
-Buy me a <a href="https://paypal.me/MarvinKrebber" target="_blank">coffee</a>.
-
-Disclaimer
-
-Netflix and Amazon Prime videos are trademarks and the author of this addon is not affiliated with these companies.
---------------------------------------------  chrome:
-You can configure which Feature to enable in the Settings Page.
-
-✨ Features
-
-Netflix Automatically skipping:
-
-• Intros
-• Recaps
-• Credits                         : automatically goes to the next episode
-• Inactivity Warning        : automatically resuming the video
-• Basic tier Ads
-
-
 Amazon Prime video Automatically skipping:
 
 • Intros
 • Credits                           : automatically goes to the next episode
 • Freevee ads
 • Self promoting ads
-
-Amazon Prime video other features:
-
 • Filtering paid content (movies, series)
 • Adding playback speed control to UI
 • Remove annoying blur when hovering over video
 
-
-☔ Safe
-
-The extension is open sourced! Check (https://github.com/Dreamlinerm/Netflix-Prime-Auto-Skip) out if you want to contribute.
-
-💕 Enjoying Netflix/Prime Auto-Skip?
+💕 Enjoying Prime Auto-Skip?
 
 Leave a 5 star review! Reviews help build trust and attract new users!
 
-Buy me a coffee (https://paypal.me/MarvinKrebber).
+Buy me a coffee (https://www.paypal.com/donate/?business=3RYBFSHKT8868&no_recurring=0&item_name=Ajude+a+manter+e+motivar+esse+desenvolvedor+a+criar+e+trabalhar+no+que+gosta+com+um+cafézinho+&currency_code=BRL).
 
 Disclaimer
 
-Netflix and Amazon Prime videos are trademarks and the author of this addon is not affiliated with these companies.
+Amazon Prime videos are trademarks and the author of this addon is not affiliated with these companies.
