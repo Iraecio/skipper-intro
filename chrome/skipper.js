@@ -1,4 +1,3 @@
-const isPrimeVideo = window.location.hostname.includes("primevideo");
 const version = "1.0.0";
 console.info("Auto-Skip Ver:", version);
 
@@ -112,7 +111,7 @@ const sysConfig = {
   },
 };
 
-let SettingsUser = {};
+let Settings = {};
 let Observers = {};
 
 /** Stop Config */
@@ -814,14 +813,16 @@ chrome.storage.sync.get(["settings"], ({ settings }) => {
   if (typeof settings !== "object") {
     chrome.storage.sync.set(userSettings);
   } else {
-    SettingsUser = settings;
+    Settings = settings;
     setObserves();
   }
 });
 
-chrome.storage.sync.onChanged.addListener(({settings}) => {
-  if (settings) {
-    SettingsUser = settings.newValue;
+// Update settings on change
+chrome.storage.sync.onChanged.addListener((changes) => {
+  console.log("changed ");
+  if (changes.settings) {
+    Settings = changes.settings.newValue;
     startOrStopbservers();
   }
 });
@@ -831,13 +832,13 @@ chrome.storage.sync.onChanged.addListener(({settings}) => {
  */
 function createObserversFromSettings(actionsToPerform = {}) {
   const observers = {};
-  const settingsUserKeys = Object.keys(SettingsUser);
+  const settingsKeys = Object.keys(Settings);
 
-  if (!settingsUserKeys?.length || !actionsToPerform?.length) {
+  if (!settingsKeys?.length || !actionsToPerform?.length) {
     return observers;
   }
 
-  for (const [key, value] of Object.entries(SettingsUser)) {
+  for (const [key, value] of Object.entries(Settings)) {
     if (value) {
       const attributeFilter = sysConfig.settings[key]?.[getHost()]?.attributeFilter ?? [];
       if (attributeFilter) {
@@ -847,6 +848,7 @@ function createObserversFromSettings(actionsToPerform = {}) {
   }
 
   Observers[getHost()] = observers;
+  console.log(Observers[getHost()]);
 
   return observers;
 }
@@ -867,15 +869,15 @@ function createObserver(attributeFilter, callback) {
 }
 
 function startOrStopbservers() {
-  const settingsUser = SettingsUser;
+  const settings = Settings;
   const host = getHost();
-
+  console.log(Observers);
   if (!Object.keys(Observers).length) return;
 
   for (const [stream, value] of Object.entries(Observers)) {
     if (stream !== host) return;
     for (const [key, observer] of Object.entries(Observers[stream])) {
-      if (settingsUser[key]) {
+      if (settings[key]) {
         const attributeFilter = sysConfig.settings[key]?.[host]?.attributeFilter ?? "";
         if (!attributeFilter) return;
 
@@ -950,6 +952,3 @@ function injectPipControls() {
   const target = document.querySelector("#hudson-wrapper .controls__right");
   target.insertAdjacentElement("afterbegin", this.createPipButton());
 }
-
-//disney+ div.controls__right >
-//adicionar antes de div.audio-control
