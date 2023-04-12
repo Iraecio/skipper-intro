@@ -2,17 +2,21 @@
     "version": "2.0.0",
     "tasks": [
       {
-        "label": "Launch chrome addon", // Name of task
+        "label": "Launch chrome addon",
         "type": "shell",
-        "command": "cd chrome && web-ext run", // Enter your command here
-        "group": "none",
+        "command": "cd chrome && web-ext run",
+        "group": {
+          "kind": "build",
+          "isDefault": true
+        },
         "presentation": {
           "reveal": "always",
           "panel": "new"
         },
         "runOptions": {
           "runOn": "folderOpen"
-        }
+        },
+        "problemMatcher": []
       }
     ]
   }

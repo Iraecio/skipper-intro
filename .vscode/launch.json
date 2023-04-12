@@ -1,8 +1,4 @@
 {
-    // Verwendet IntelliSense zum Ermitteln möglicher Attribute.
-    // Zeigen Sie auf vorhandene Attribute, um die zugehörigen Beschreibungen anzuzeigen.
-    // Weitere Informationen finden Sie unter https://go.microsoft.com/fwlink/?linkid=830387
-   
     "version": "0.2.0",
     "configurations": [
         {
@@ -12,14 +8,5 @@
             "name": "skipper.js",
             "file": "${workspaceFolder}/chrome/skipper.js"
         },
-        {
-            
-            "type": "chrome",
-            "request": "launch",
-            "reAttach": true,
-            "name": "settings.html",
-            "file": "${workspaceFolder}/chrome/popup/settings.html"
-        }
     ]
-
 }
