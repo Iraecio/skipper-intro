@@ -40,7 +40,7 @@ chrome.storage.sync.get(["settings"], (result) => {
   if (changedSettings) {
     chrome.storage.sync.set({ settings });
   }
-  
+
   setCheckboxesToSettings();
 });
 
@@ -68,7 +68,7 @@ function setCheckboxesToSettings() {
 
 // Toggle setting
 function toggleSetting(key) {
-  if (settings[key]) {
+  if (key in settings) {
     settings[key] = !settings[key];
     chrome.storage.sync.set({ settings });
   }
