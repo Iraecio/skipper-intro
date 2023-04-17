@@ -8,6 +8,7 @@ const defaultSettings = {
     speedSlider: true,
     filterPaid: true,
     pip: true,
+    cleanCatalog: false,
   },
 };
 
@@ -16,6 +17,12 @@ let settings = {};
 // Merge default settings with user settings
 function mergeSettings(userSettings, defaultSettings) {
   let changedSettings = false;
+
+  for (const key in defaultSettings) {
+    if (userSettings.hasOwnProperty(key)) continue;
+    userSettings[key] = defaultSettings[key];
+    changedSettings = true;
+  }
 
   for (const key in userSettings) {
     if (!defaultSettings.hasOwnProperty(key)) {
@@ -77,7 +84,7 @@ function toggleSetting(key) {
 // Handle button clicks
 document.addEventListener("DOMContentLoaded", () => {
   document.addEventListener("click", (e) => {
-    const validIds = ["skipCredits", "skipIntro", "skipAd", "blockFreevee", "speedSlider", "filterPaid", "pip"];
+    const validIds = ["skipCredits", "skipIntro", "skipAd", "blockFreevee", "speedSlider", "filterPaid", "cleanCatalog", "pip"];
     if (validIds.includes(e.target.id)) toggleSetting(e.target.id);
   });
 });
