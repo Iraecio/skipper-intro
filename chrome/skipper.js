@@ -55,7 +55,7 @@ const sysConfig = {
     },
     skipAd: {
       [Stream.PrimeVideo]: {
-        attributeFilter: "#dv-web-player",
+        attributeFilter: ".atvwebplayersdk-infobar-container",
       },
       [Stream.NetFlix]: {
         attributeFilter: "#dv-web-player",
@@ -206,13 +206,13 @@ const primeVideoFunctions = {
     }
   },
   skipAd: function (mutations, observer) {
-    const targetMutations = mutations.filter(({ target }) => target.querySelector("div > div:nth-child(1) > div > div > div.scalingVideoContainer > div.scalingVideoContainerBottom > div > video"));
+    const targetMutations = mutations.filter(({ target }) => target.querySelector(".fu4rd6c.f1cw2swo"));
+    console.log(targetMutations);
     for (let { target } of targetMutations) {
+      console.log(target);
       if (target) {
-        target.onplay = function () {
-          const button = document.querySelector(".fu4rd6c.f1cw2swo");
-          clickButton(button, "Self Ad skipped");
-        };
+        console.log(target);
+        clickButton(target, "Self Ad skipped");
       }
     }
   },
@@ -330,40 +330,9 @@ const primeVideoFunctions = {
       }
     }
   },
-  pip: function (mutations, observer) {
-    return;
-  },
-  cleanCatalog: function (mutations, observer) {
-    return;
-  },
 };
 
-const netFlixFunctions = {
-  skipIntro: function (mutations, observer) {
-    return;
-  },
-  skipCredits: function (mutations, observer) {
-    return;
-  },
-  skipAd: function (mutations, observer) {
-    return;
-  },
-  blockFreevee: function (mutations, observer) {
-    return;
-  },
-  speedSlider: function (mutations, observer) {
-    return;
-  },
-  filterPaid: function (mutations, observer) {
-    return;
-  },
-  pip: function (mutations, observer) {
-    return;
-  },
-  cleanCatalog: function (mutations, observer) {
-    return;
-  },
-};
+const netFlixFunctions = {};
 
 const disneyPlusFunctions = {
   skipIntro: function ([{ target }]) {
@@ -380,12 +349,6 @@ const disneyPlusFunctions = {
       clickButton(nextButton, `Skipped credits.`);
     }
   },
-  skipAd: function (mutations, observer) {
-    return;
-  },
-  blockFreevee: function (mutations, observer) {
-    return;
-  },
   speedSlider: function (mutations, observer) {
     const video = document.querySelector("video");
     const alreadySlider = document.querySelector("#videoSpeed");
@@ -400,9 +363,6 @@ const disneyPlusFunctions = {
     } else {
       removeSpeedSliderControls();
     }
-  },
-  filterPaid: function (mutations, observer) {
-    return;
   },
   pip: function (mutations, observer) {
     const hasPipControls = document.getElementById("pip-btn") ? true : false;
@@ -509,8 +469,7 @@ chrome.storage.sync.onChanged.addListener((changes) => {
 });
 
 function setObserves() {
-  const host = getHost();
-  const functions = functionsMap[host];
+  const functions = functionsMap[getHost()];
   if (functions) {
     createObserversFromSettings(functions);
     startOrStopObservers();
@@ -536,7 +495,7 @@ function createObserversFromSettings(actionsToPerform = {}) {
     if (Observers[host][key]) continue;
     if (value) {
       const attributeFilter = sysConfig.settings[key]?.[host]?.attributeFilter ?? [];
-      if (attributeFilter) {
+      if (attributeFilter && actionsToPerform.hasOwnProperty(key)) {
         observers[key] = createObserver(attributeFilter, actionsToPerform[key]);
       }
     }
@@ -584,7 +543,7 @@ function startOrStopObservers() {
       observer.disconnect();
     }
 
-    if (functionsAddOrRemove.includes(key)) {
+    if (functionsAddOrRemove.includes(key) && functionsMap[host].hasOwnProperty(key)) {
       functionsMap[host][key]();
     }
   }
