@@ -12,6 +12,7 @@ const userSettings = {
     filterPaid: true,
     pip: true,
     cleanCatalog: false,
+    hideAction: false,
   },
 };
 
@@ -137,6 +138,20 @@ const sysConfig = {
         attributeFilter: "#home-collection",
       },
     },
+    hideAction: {
+      [Stream.PrimeVideo]: {
+        attributeFilter: ".tHfREs",
+      },
+      [Stream.NetFlix]: {
+        attributeFilter: ".DVWebNode-storefront-wrapper",
+      },
+      [Stream.DisneyPlus]: {
+        attributeFilter: "#hudson-wrapper",
+      },
+      [Stream.StarPlus]: {
+        attributeFilter: "#hudson-wrapper",
+      },
+    },
   },
 };
 
@@ -207,11 +222,9 @@ const primeVideoFunctions = {
   },
   skipAd: function (mutations, observer) {
     const targetMutations = mutations.filter(({ target }) => target.querySelector(".fu4rd6c.f1cw2swo"));
-    console.log(targetMutations);
+    if (!targetMutations) return;
     for (let { target } of targetMutations) {
-      console.log(target);
       if (target) {
-        console.log(target);
         clickButton(target, "Self Ad skipped");
       }
     }
@@ -330,6 +343,36 @@ const primeVideoFunctions = {
       }
     }
   },
+  hideAction: function (mutations, observer) {
+    const url = window.location.href;
+
+    if (!url.includes("/detail/")) return;
+
+    //verificar o estado do bloqueio
+    //se tiver bloqueado escurecer a foto e alterar o nome para vermelho
+    //task
+
+    const hasHideButton = document.getElementById("hide-btn") ? true : false;
+    if (hasHideButton) return;
+
+    const parsedUrl = new URL(url);
+    const urlId = parsedUrl.pathname.split("/")[2];
+
+    const target = document.querySelector("div.JRTz81");
+    if (target) {
+      createHideButton(urlId)
+        .then((result) => {
+          if (result) {
+            target.appendChild(result);
+          }
+        })
+        .catch((e) => {
+          console.log(e);
+        });
+    }
+
+    console.log("HIDE 1");
+  },
 };
 
 const netFlixFunctions = {};
@@ -398,27 +441,34 @@ const disneyPlusFunctions = {
     target.insertBefore(pipButton, audioControlDiv);
   },
   cleanCatalog: function (mutations, observer) {
-    const elements = document.querySelectorAll("a.sc-htoDjs");
+    const slidersCard = document.querySelectorAll("div.slick-slide") ?? [];
+    slidersCard.forEach((element) => {
+      element.classList.add("slick-active");
+    });
+
+    const elements = document.querySelectorAll("a.sc-htoDjs") ?? [];
 
     if (!elements || elements.length === 0) {
       return;
     }
 
-    const elementValues = {};
+    const elementMap = new Map();
 
     elements.forEach((element) => {
       const value = element.getAttribute("data-gv2elementvalue");
 
-      if (elementValues[value]) {
-        elementValues[value].push(element);
-      } else {
-        elementValues[value] = [element];
+      if (value) {
+        if (elementMap.has(value)) {
+          elementMap.get(value).push(element);
+        } else {
+          elementMap.set(value, [element]);
+        }
       }
     });
 
-    for (const value in elementValues) {
-      if (elementValues[value].length > 1) {
-        elementValues[value].forEach((element) => {
+    for (const [value, elements] of elementMap.entries()) {
+      if (elements.length > 1) {
+        elements.forEach((element) => {
           let currentElement = element;
 
           while (currentElement && !currentElement.classList.contains("slick-slide")) {
@@ -429,16 +479,6 @@ const disneyPlusFunctions = {
             currentElement.remove();
           }
         });
-      } else {
-        let currentElement = elementValues[value][0];
-
-        while (currentElement && !currentElement.classList.contains("slick-slide")) {
-          currentElement = currentElement.parentElement;
-        }
-
-        if (currentElement) {
-          currentElement.classList.add("slick-active");
-        }
       }
     }
   },
@@ -557,8 +597,75 @@ function togglePiP() {
     if (document.pictureInPictureEnabled) {
       const element = document.getElementsByTagName("video")[0];
       element.requestPictureInPicture();
+      chrome.storage.sync.set({ pipWindowsActive: true });
     }
   }
+}
+
+function toggleHide(urlId) {
+  return new Promise((resolve, reject) => {
+    // Verificar se o urlId é uma string válida
+    if (!urlId || typeof urlId !== "string") {
+      reject(new Error("urlId inválido."));
+      return;
+    }
+
+    chrome.storage.sync.get("blockedUrls", (result) => {
+      let blockedUrls = result.blockedUrls || {};
+
+      const host = getHost();
+
+      // Verificar se o host é uma string válida
+      if (!host || typeof host !== "string") {
+        reject(new Error("Host inválido."));
+        return;
+      }
+
+      // Verificar se o objeto blockedUrls é válido
+      if (typeof blockedUrls !== "object" || Array.isArray(blockedUrls)) {
+        reject(new Error("Objeto blockedUrls inválido."));
+        return;
+      }
+
+      if (!blockedUrls[host]) {
+        blockedUrls[host] = [urlId];
+        console.log(`URL ${urlId} bloqueada no host ${host}`);
+      } else {
+        const index = blockedUrls[host].indexOf(urlId);
+        if (index > -1) {
+          // Remove a URL da lista de bloqueios
+          blockedUrls[host].splice(index, 1);
+          console.log(`URL ${urlId} desbloqueada no host ${host}`);
+        } else {
+          // Adiciona a URL à lista de bloqueios
+          blockedUrls[host].push(urlId);
+          console.log(`URL ${urlId} bloqueada no host ${host}`);
+        }
+      }
+
+      chrome.storage.sync.set({ blockedUrls: blockedUrls }, () => {
+        // Verificar se chrome.storage.sync.set foi bem sucedido
+        if (chrome.runtime.lastError) {
+          reject(new Error(chrome.runtime.lastError.message));
+          return;
+        }
+
+        createHideButton(urlId).then((result) => {
+          const hideButton = document.getElementById("hide-btn");
+          if (hideButton) {
+            hideButton.remove();
+            const target = document.querySelector("div.JRTz81");
+            if (target) {
+              if (result) {
+                target.appendChild(result);
+              }
+            }
+          }
+          resolve(true);
+        });
+      });
+    });
+  });
 }
 
 function createPipButton() {
@@ -574,6 +681,69 @@ function createPipButton() {
   pip.addEventListener("click", () => togglePiP());
 
   return pip;
+}
+
+function createHideButton(urlId) {
+  let blockedUrls = {};
+  const host = getHost();
+  return new Promise((resolve, reject) => {
+    chrome.storage.sync.get("blockedUrls", (result) => {
+      blockedUrls = result.blockedUrls || {};
+
+      const blocked = blockedUrls[host].includes(urlId);
+      const buttonIcon = getHtmlButton(blocked);
+
+      const type = "span";
+      const hide = document.createElement(type);
+      hide.type = type;
+      hide.role = type;
+      hide.tabindex = "0";
+      hide.classList = "";
+      hide.id = "hide-btn";
+      hide.innerHTML = buttonIcon;
+      hide.addEventListener("click", () => toggleHide(urlId));
+
+      resolve(hide);
+    });
+  });
+}
+
+function getHtmlButton(active) {
+  if (active) {
+    console.log("Esta bloqueado mostrar botao para desbloquear");
+    return `
+    <div class="_2Yly53 _2Jh193">
+    <button type="button" role="button" class="_16hnQU gWrHlr OLz56u">
+    <svg class="_22qEau" viewBox="0 0 24 24" height="24" width="24" role="img" aria-hidden="true" style="height:var(--dvui-icon-height);width:var(--dvui-icon-width)">
+      <title>Hide</title>
+      <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" height="24" width="24"><title>Hide</title>
+        <path opacity="0.1" d="M6.29528 7.87634L5 9.17162C3.66667 10.505 3 11.1716 3 12C3 12.8285 3.66667 13.4951 5 14.8285L7.12132 16.9498C9.85499 19.6835 14.2871 19.6835 17.0208 16.9498L17.4322 16.5384L14.5053 14.2619C13.9146 14.8713 13.0873 15.2501 12.1716 15.2501C10.3766 15.2501 8.92157 13.795 8.92157 12.0001C8.92157 11.3746 9.09827 10.7904 9.40447 10.2946L6.29528 7.87634Z" fill="currentColor"></path> 
+        <path d="M3.17139 5.12988L21.1714 19.1299" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M14.3653 13.8456C13.8162 14.5483 12.9609 15 12 15C10.3431 15 9 13.6569 9 12C9 11.3256 9.22253 10.7032 9.59817 10.2021" stroke="currentColor" stroke-width="2"></path> <path d="M9 5.62667C11.5803 4.45322 14.7268 4.92775 16.8493 7.05025L19.8511 10.052C20.3477 10.5486 20.5959 10.7969 20.7362 11.0605C21.0487 11.6479 21.0487 12.3521 20.7362 12.9395C20.5959 13.2031 20.3477 13.4514 19.8511 13.948V13.948L19.799 14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> 
+        <path d="M7.01596 8.39827C7.40649 8.00774 7.40649 7.37458 7.01596 6.98406C6.62544 6.59353 5.99228 6.59353 5.60175 6.98406L7.01596 8.39827ZM7.65685 16.2427L5.53553 14.1213L4.12132 15.5356L6.24264 17.6569L7.65685 16.2427ZM16.1421 16.2427C13.799 18.5858 10 18.5858 7.65685 16.2427L6.24264 17.6569C9.36684 20.7811 14.4322 20.7811 17.5563 17.6569L16.1421 16.2427ZM5.53553 9.8787L7.01596 8.39827L5.60175 6.98406L4.12132 8.46449L5.53553 9.8787ZM16.7465 15.6383L16.1421 16.2427L17.5563 17.6569L18.1607 17.0526L16.7465 15.6383ZM5.53553 14.1213C4.84888 13.4347 4.40652 12.9893 4.12345 12.6183C3.85798 12.2704 3.82843 12.1077 3.82843 12H1.82843C1.82843 12.7208 2.1322 13.3056 2.53341 13.8315C2.917 14.3342 3.47464 14.8889 4.12132 15.5356L5.53553 14.1213ZM4.12132 8.46449C3.47464 9.11116 2.917 9.6658 2.53341 10.1686C2.1322 10.6944 1.82843 11.2792 1.82843 12H3.82843C3.82843 11.8924 3.85798 11.7297 4.12345 11.3817C4.40652 11.0107 4.84888 10.5654 5.53553 9.8787L4.12132 8.46449Z" fill="currentColor"></path>
+      </svg>
+    </svg>
+    </button>
+    <div>`;
+  } else {
+    console.log("Nao esta bloqueado mostrar botao para bloquear");
+    return `
+    <div class="_2Yly53 _2Jh193">
+      <button type="button" role="button" class="_16hnQU gWrHlr OLz56u">
+        <svg class="_22qEau" viewBox="0 0 24 24" height="24" width="24" role="img" aria-hidden="true" style="height:var(--dvui-icon-height);width:var(--dvui-icon-width)">
+          <title>Show</title>
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M15 12C15 13.6569 13.6569 15 12 15C10.3431 15 9 13.6569 9 12C9 10.3431 10.3431 9 12 9C13.6569 9 15 10.3431 15 12Z" stroke="currentColor" stroke-width="2"></path>
+            <path
+              d="M6.94975 7.05025C9.68342 4.31658 14.1156 4.31658 16.8492 7.05025L18.9706 9.17157C20.3039 10.5049 20.9706 11.1716 20.9706 12C20.9706 12.8284 20.3039 13.4951 18.9706 14.8284L16.8492 16.9497C14.1156 19.6834 9.68342 19.6834 6.94975 16.9497L4.82843 14.8284C3.49509 13.4951 2.82843 12.8284 2.82843 12C2.82843 11.1716 3.49509 10.5049 4.82843 9.17157L6.94975 7.05025Z"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linejoin="round"
+            ></path>
+          </svg>
+        </svg>
+      </button>
+    <div>`;
+  }
 }
 
 function createSpeedButton(id = "speedbutton", style = "margin-left:0px;", orientation = 1) {

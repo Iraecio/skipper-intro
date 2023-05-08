@@ -1,4 +1,3 @@
-// Default settings
 const defaultSettings = {
   settings: {
     skipIntro: true,
@@ -9,82 +8,79 @@ const defaultSettings = {
     filterPaid: true,
     pip: true,
     cleanCatalog: false,
+    hideAction: false,
   },
 };
 
 let settings = {};
 
-// Merge default settings with user settings
 function mergeSettings(userSettings, defaultSettings) {
-  let changedSettings = false;
+  const mergedSettings = { ...defaultSettings, ...userSettings };
+  const defaultKeys = Object.keys(defaultSettings);
+  const userKeys = Object.keys(userSettings);
 
-  for (const key in defaultSettings) {
-    if (userSettings.hasOwnProperty(key)) continue;
-    userSettings[key] = defaultSettings[key];
-    changedSettings = true;
-  }
-
-  for (const key in userSettings) {
-    if (!defaultSettings.hasOwnProperty(key)) {
-      delete userSettings[key];
-      changedSettings = true;
+  for (const key of defaultKeys) {
+    if (!userKeys.includes(key)) {
+      mergedSettings[key] = defaultSettings[key];
     }
   }
 
-  return changedSettings;
-}
-
-// Retrieve and update settings
-chrome.storage.sync.get(["settings"], (result) => {
-  if (typeof result.settings === "object") {
-    settings = result.settings;
-  } else {
-    settings = defaultSettings.settings;
+  for (const key of userKeys) {
+    if (!defaultKeys.includes(key)) {
+      delete mergedSettings[key];
+    }
   }
 
-  const changedSettings = mergeSettings(settings, defaultSettings.settings);
+  const changedSettings = JSON.stringify(mergedSettings) !== JSON.stringify(userSettings);
+  return changedSettings ? mergedSettings : userSettings;
+}
 
+chrome.storage.sync.get(["settings"], (result) => {
+  settings = result.settings ?? defaultSettings.settings;
+  const changedSettings = mergeSettings(settings, defaultSettings.settings);
   if (changedSettings) {
     chrome.storage.sync.set({ settings });
   }
-
   setCheckboxesToSettings();
 });
 
-// Update settings on change
 chrome.storage.sync.onChanged.addListener((changes) => {
   if (changes.settings) {
-    settings = changes.settings.newValue;
-    setCheckboxesToSettings();
+    const newSettings = changes.settings.newValue;
+    if (JSON.stringify(settings) !== JSON.stringify(newSettings)) {
+      settings = newSettings;
+      setCheckboxesToSettings();
+    }
   }
 });
 
-// Set checkbox
-function setCheckboxToSetting(key, status) {
-  const button = document.querySelector(`#${key}`);
-  if (button) button.checked = status;
-}
-
-// Set checkboxes
 function setCheckboxesToSettings() {
   if (!Object.entries(settings).length) return;
   for (const [key, value] of Object.entries(settings)) {
-    setCheckboxToSetting(key, value);
+    const button = document.querySelector(`#${key}`);
+    if (button) {
+      button.checked = value;
+    }
   }
 }
 
-// Toggle setting
 function toggleSetting(key) {
-  if (key in settings) {
-    settings[key] = !settings[key];
+  const currentValue = settings[key];
+  const newValue = !currentValue;
+  if (currentValue !== newValue) {
+    settings[key] = newValue;
     chrome.storage.sync.set({ settings });
   }
 }
 
-// Handle button clicks
+function handleButtonClick(e) {
+  const keysId = Object.keys(defaultSettings.settings);
+  const id = e.target.id;
+  if (keysId.includes(id) && id) {
+    toggleSetting(id);
+  }
+}
+
 document.addEventListener("DOMContentLoaded", () => {
-  document.addEventListener("click", (e) => {
-    const validIds = ["skipCredits", "skipIntro", "skipAd", "blockFreevee", "speedSlider", "filterPaid", "cleanCatalog", "pip"];
-    if (validIds.includes(e.target.id)) toggleSetting(e.target.id);
-  });
+  document.addEventListener("click", handleButtonClick);
 });
